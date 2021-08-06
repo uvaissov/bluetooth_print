@@ -201,6 +201,10 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
       case "destroy":
         result.success(destroy());
         break;
+      case "writeData":
+        Log.i("NATIVE","writeData");
+        writeData(result, args);
+        break;
       case "rawBytes":
         Log.i("NATIVE","rawBytes");
         printRawBytes(result,args);
@@ -372,6 +376,28 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
     return true;
   }
 
+    private void writeData(Result result, Map<String, Object> args) {
+        if (args.containsKey("bytes")) {
+            final ArrayList<Integer> bytes = (ArrayList<Integer>)args.get("bytes");
+
+            threadPool = ThreadPool.getInstantiation();
+            threadPool.addSerialTask(new Runnable() {
+                @Override
+                public void run() {
+                    Vector<Byte> vectorData = new Vector<>();
+                    for(int i = 0; i < bytes.size(); ++i) {
+                        Integer val = bytes.get(i);
+                        vectorData.add(Byte.valueOf( Integer.toString(val > 127 ? val-256 : val ) ));
+                    }
+
+                    DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendDataImmediately(vectorData);
+                }
+            });
+        } else {
+            result.error("bytes_empty", "Bytes param is empty", null);
+        }
+    }
+
   private void printTest(Result result) {
     if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
             !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
@@ -433,6 +459,7 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
     if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
             !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
 
+      Log.i("BluetoothPrint","not connect, state not right" );
       result.error("not connect", "state not right", null);
     }
 
@@ -448,13 +475,7 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
       threadPool.addSerialTask(new Runnable() {
         @Override
         public void run() {
-          if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.ESC) {
-            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
-          }else if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.TSC) {
-            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
-          }else if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.CPCL) {
-            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
-          }
+        DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
         }
       });
     }else{

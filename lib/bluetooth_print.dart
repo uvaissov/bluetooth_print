@@ -139,6 +139,17 @@ class BluetoothPrint {
     _channel.invokeMethod('rawBytes', args);
     return Future.value(true);
   }
+  
+  
+  Future<dynamic> writeData(List<int> bytes) {
+    Map<String, Object> args = Map();
+    args['bytes'] = bytes;
+    args['length'] = bytes.length;
+
+    _channel.invokeMethod('writeData', args);
+
+    return Future.value(true);
+  }
 
   Future<dynamic> destroy() => _channel.invokeMethod('destroy');
 
