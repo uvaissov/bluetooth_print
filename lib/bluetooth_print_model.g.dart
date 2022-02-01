@@ -34,6 +34,7 @@ LineText _$LineTextFromJson(Map<String, dynamic> json) {
   return LineText(
     type: json['type'] as String?,
     content: json['content'] as String?,
+    charsetName: json['charsetName'] as String?,
     size: json['size'] as int?,
     align: json['align'] as int?,
     weight: json['weight'] as int?,
@@ -57,6 +58,7 @@ Map<String, dynamic> _$LineTextToJson(LineText instance) {
 
   writeNotNull('type', instance.type);
   writeNotNull('content', instance.content);
+  writeNotNull('charsetName', instance.charsetName);
   writeNotNull('size', instance.size);
   writeNotNull('align', instance.align);
   writeNotNull('weight', instance.weight);

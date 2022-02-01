@@ -5,8 +5,10 @@ import android.graphics.BitmapFactory;
 import android.util.Base64;
 import com.gprinter.command.CpclCommand;
 import com.gprinter.command.EscCommand;
+import com.gprinter.command.GpUtils;
 import com.gprinter.command.LabelCommand;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -25,9 +27,11 @@ public class PrintContent {
             //打印走纸多少个单位
             esc.addPrintAndFeedLines((byte) 3);
 
+            esc.addSelectCodePage(EscCommand.CODEPAGE.PC866);
             // {type:'text|barcode|qrcode|image', content:'', size:4, align: 0|1|2, weight: 0|1, width:0|1, height:0|1, underline:0|1, linefeed: 0|1}
             for (Map<String,Object> m: list) {
                   String type = (String)m.get("type");
+                  String charsetName = (String)m.get("charsetName");
                   String content = (String)m.get("content");
                   int align = (int)(m.get("align")==null?0:m.get("align"));
                   int size = (int)(m.get("size")==null?4:m.get("size"));
@@ -41,14 +45,33 @@ public class PrintContent {
                   EscCommand.ENABLE doublewidth = width==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
                   EscCommand.ENABLE doubleheight = height==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
                   EscCommand.ENABLE isUnderline = underline==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
-
                   // 设置打印位置
                   esc.addSelectJustification(align==0?EscCommand.JUSTIFICATION.LEFT:(align==1?EscCommand.JUSTIFICATION.CENTER:EscCommand.JUSTIFICATION.RIGHT));
-
+                  System.out.println(type);
+                  System.out.println(content);
+                  System.out.println("------");
                   if("text".equals(type)){
-                        // 设置为倍高倍宽
+
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, emphasized, doubleheight, doublewidth, isUnderline);
-                        esc.addText(content);
+                        if(charsetName!=null) {
+                              String text = "";
+                              try {
+                                    text = new String(content.getBytes("UTF-8"), charsetName);
+                              } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                              }
+                              esc.addText(text, charsetName);
+
+                        } else {
+                              esc.addText(content);
+                        }
+
+                        try {
+                        esc.addUserCommand("Привет Мир".getBytes("cp866"));
+                        } catch (UnsupportedEncodingException e) {
+                              e.printStackTrace();
+                        }
+
                         // 取消倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF);
                   }else if("barcode".equals(type)){

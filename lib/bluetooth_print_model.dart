@@ -13,23 +13,24 @@ class BluetoothDevice {
 
   factory BluetoothDevice.fromJson(Map<String, dynamic> json) =>
       _$BluetoothDeviceFromJson(json);
+
   Map<String, dynamic> toJson() => _$BluetoothDeviceToJson(this);
 }
 
 @JsonSerializable(includeIfNull: false)
 class LineText {
-  LineText(
-      {this.type, //text,barcode,qrcode,image(base64 string)
-      this.content,
-      this.size = 0,
-      this.align = ALIGN_LEFT,
-      this.weight = 0, //0,1
-      this.width = 0, //0,1
-      this.height = 0, //0,1
-      this.underline = 0, //0,1
-      this.linefeed = 0, //0,1
-      this.x = 0,
-      this.y = 0});
+  LineText({this.type, //text,barcode,qrcode,image(base64 string)
+    this.content,
+    this.charsetName,
+    this.size = 0,
+    this.align = ALIGN_LEFT,
+    this.weight = 0, //0,1
+    this.width = 0, //0,1
+    this.height = 0, //0,1
+    this.underline = 0, //0,1
+    this.linefeed = 0, //0,1
+    this.x = 0,
+    this.y = 0});
 
   static const String TYPE_TEXT = 'text';
   static const String TYPE_BARCODE = 'barcode';
@@ -41,6 +42,7 @@ class LineText {
 
   final String? type;
   final String? content;
+  final String? charsetName;
   final int? size;
   final int? align;
   final int? weight;
@@ -53,5 +55,6 @@ class LineText {
 
   factory LineText.fromJson(Map<String, dynamic> json) =>
       _$LineTextFromJson(json);
+
   Map<String, dynamic> toJson() => _$LineTextToJson(this);
 }
